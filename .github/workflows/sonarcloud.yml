@@ -16,25 +16,35 @@ jobs:
 
     steps:
       - name: Set up JDK 17
+        id: setup_java
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'temurin'
 
-     
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Analyze with SonarCloud
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-     
-        uses: SonarSource/sonarcloud-github-action@de2e56b42aa84d0b1c5b622644ac17e505c9a049
+      - name: Run SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: 50b6a990e7d3690b138f59b18c1849205b77e105
-          JAVA_HOME: ${{ steps.setup_java.outputs.java-path }}
-        with:
-          args: >
-            -Dsonar.projectKey=sbahala_ELCAttendance
-            -Dsonar.organization=sbahala
+          SONAR_TOKEN: 50b6a990e7d3690b138f59b18c1849205b77e105 # Replace with your SONAR_TOKEN secret name if different
+        run: |
+          export JAVA_HOME=${{ steps.setup_java.outputs.java-home }}
+          export PATH=$JAVA_HOME/bin:$PATH
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip sonar-scanner-cli-4.6.2.2472-linux.zip
+          sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
+            -Dsonar.projectKey=sbahala_ELCAttendance \
+            -Dsonar.organization=sbahala \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.verbose=true

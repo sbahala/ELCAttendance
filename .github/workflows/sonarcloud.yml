@@ -43,6 +43,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'  # AdoptOpenJDK is now Eclipse Temurin
+
+      # Checkout your repository so SonarCloud analysis can be run against it
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Analyze with SonarCloud
 
         # You can pin the exact commit or the version.
